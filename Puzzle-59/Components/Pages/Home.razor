@@ -14,13 +14,64 @@
 
 <p>Non-numeric values should be ignored, as should numbers two places to the right of the decimal point.</p>
 
-<input style="text-align:right;font-weight:bold;" @bind="@MyCurrencyValue" />
+@* guess #1 is just CSS and a number field.  This still allows decimals greater tahn 3 
+<label style="position: relative; left:15px;">$</label>
+<input type="number" style="text-align:right;font-weight:bold;text-indent:15px;max-width:50" @bind="@MyCurrencyValue" />
+
+ This does not work as the user is typing,but will fix it on blur 
+<input style="text-align:right;font-weight:bold;text-indent:15px;min-width:50px" @bind="@MyCurrencyValueString" @onblur="HandleOnBlur" />
+ offical answer: 
+<input style="text-align:right;font-weight:bold;text-indent:15px;min-width:50px" @bind="@EditableCurrencyValue" onfocus="this.select()" />
+*@
+<br />
+No parameters: <CurrencyInput ></CurrencyInput>
+<br />
+Israeli culture and rtl:  <CurrencyInput Culture="ar-IL" rtl="true"></CurrencyInput>
+<br />
+German culture <CurrencyInput Culture="de-DE"></CurrencyInput>
+<br />
+US, with 5 decimalplaces:<CurrencyInput Culture="en-US" decimalPlaces="5"></CurrencyInput>
 <br />
 <br />
 <button>Dummy Button</button>
 
 @code {
-    
-    decimal MyCurrencyValue { get; set; } = 0;
+
+	decimal MyCurrencyValue { get; set; } = 0;
+	string MyCurrencyValueString { get; set; } = string.Empty;
+
+	decimal MyEditableCurrencyValue { get; set; } = 0;
+
+	string EditableCurrencyValue
+	{
+		get => MyEditableCurrencyValue.ToString("C");
+		set
+
+		{
+			var newValue = CleanAndFormatDecimal(value, 2);
+			if (newValue != 0)
+				MyEditableCurrencyValue = newValue;
+		}
+	}
+
+
+
+	public void HandleOnBlur(FocusEventArgs args)
+	{
+		decimal.TryParse(MyCurrencyValueString, out var amount);
+		MyCurrencyValueString = amount.ToString("C2");
+	}
+
+	public decimal CleanAndFormatDecimal(string input, int decimalPlaces)
+	{
+		if (decimal.TryParse(input, out decimal result)) {
+			var formattedString = Math.Round(result, decimalPlaces).ToString($"F{decimalPlaces}");
+
+			if (formattedString != string.Empty)
+				return decimal.Parse(formattedString);
+		}
+
+		return 0;
+	}
 }
 

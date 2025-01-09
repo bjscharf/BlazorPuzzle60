@@ -1,0 +1,48 @@
+﻿@using System.Globalization
+
+<input style="font-weight:bold;text-indent:15px;min-width:50px" @bind="@EditableCurrencyValue" onfocus="this.select()" dir=@alignment />
+
+@code {
+	[Parameter]
+	public string Culture { get; set; } = "en-US"; //This allows the consumer to set the country and the laguage 
+	
+	[Parameter]
+	public bool rtl { get; set; } = false;//this allows the consumer to set the direction for languages like Hebrew and Arabic
+	
+	[Parameter]
+	public int decimalPlaces { get; set; } = 2;
+
+	decimal MyEditableCurrencyValue { get; set; } = 0;
+	string alignment { get; set; } = "ltr";
+
+	string EditableCurrencyValue
+	{
+		get => MyEditableCurrencyValue.ToString($"C{decimalPlaces}", new CultureInfo(Culture));
+
+		set
+		{
+			var newValue = CleanAndFormatDecimal(value);
+			if (newValue != 0)
+				MyEditableCurrencyValue = newValue;
+		}
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (rtl)
+			alignment = "rtl";
+	}
+
+	public decimal CleanAndFormatDecimal(string input)
+	{
+		if (decimal.TryParse(input, out decimal result))
+		{
+			var formattedString = Math.Round(result, decimalPlaces).ToString($"F{decimalPlaces}" );
+
+			if (formattedString != string.Empty)
+				return decimal.Parse(formattedString);
+		}
+
+		return 0;
+	}
+}
