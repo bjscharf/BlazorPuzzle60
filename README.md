@@ -1,4 +1,4 @@
-# Blazor Puzzle #59
+# Blazor Puzzle #60 but based on 59
 
 ## Coding for Dollars
 
